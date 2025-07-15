@@ -1,61 +1,498 @@
+
+
 import streamlit as st
 import csv
 import io
+import pandas as pd
 
+st.set_page_config(page_title="NutraSNP Tracker", layout="wide")
 st.title("🧬 NutraSNP Tracker")
 
-# --- SNP Annotation Database ---
-snp_annotations = {'rs1544410': {'Gene': 'VDR', 'Nutrient': 'Vitamin D', 'Impact': 'Reduced vitamin D receptor function', 'Recommendation': 'Consider vitamin D3 supplements'}, 'rs2228570': {'Gene': 'VDR', 'Nutrient': 'Vitamin D', 'Impact': 'Affects vitamin D metabolism', 'Recommendation': 'Monitor vitamin D levels regularly'}, 'rs1801133': {'Gene': 'MTHFR', 'Nutrient': 'Folate', 'Impact': 'Poor folate conversion', 'Recommendation': 'Take methylated folate; eat leafy greens'}, 'rs1801131': {'Gene': 'MTHFR', 'Nutrient': 'Folate', 'Impact': 'Intermediate folate metabolism', 'Recommendation': 'Moderate supplementation may help'}, 'rs4988235': {'Gene': 'LCT', 'Nutrient': 'Lactose', 'Impact': 'Reduced lactase production', 'Recommendation': 'Try lactose-free dairy or enzyme supplements'}, 'rs1799945': {'Gene': 'HFE', 'Nutrient': 'Iron', 'Impact': 'Risk of iron overload', 'Recommendation': 'Avoid iron supplements unless tested'}, 'rs174537': {'Gene': 'FADS1', 'Nutrient': 'Omega-3 fatty acids', 'Impact': 'Lower DHA synthesis', 'Recommendation': 'Consume EPA/DHA from fish or algae oils'}, 'rs762551': {'Gene': 'CYP1A2', 'Nutrient': 'Caffeine', 'Impact': 'Fast caffeine metabolism', 'Recommendation': 'Higher caffeine tolerance'}, 'rs738409': {'Gene': 'PNPLA3', 'Nutrient': 'Vitamin E', 'Impact': 'Liver fat accumulation risk', 'Recommendation': 'Consider vitamin E under supervision'}, 'rs9939609': {'Gene': 'FTO', 'Nutrient': 'General metabolism', 'Impact': 'Increased risk of obesity', 'Recommendation': 'Focus on physical activity and diet'}, 'rs1000011': {'Gene': 'GENE11', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 11', 'Recommendation': 'Mock recommendation for SNP 11'}, 'rs1000012': {'Gene': 'GENE12', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 12', 'Recommendation': 'Mock recommendation for SNP 12'}, 'rs1000013': {'Gene': 'GENE13', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 13', 'Recommendation': 'Mock recommendation for SNP 13'}, 'rs1000014': {'Gene': 'GENE14', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 14', 'Recommendation': 'Mock recommendation for SNP 14'}, 'rs1000015': {'Gene': 'GENE15', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 15', 'Recommendation': 'Mock recommendation for SNP 15'}, 'rs1000016': {'Gene': 'GENE16', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 16', 'Recommendation': 'Mock recommendation for SNP 16'}, 'rs1000017': {'Gene': 'GENE17', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 17', 'Recommendation': 'Mock recommendation for SNP 17'}, 'rs1000018': {'Gene': 'GENE18', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 18', 'Recommendation': 'Mock recommendation for SNP 18'}, 'rs1000019': {'Gene': 'GENE19', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 19', 'Recommendation': 'Mock recommendation for SNP 19'}, 'rs1000020': {'Gene': 'GENE20', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 20', 'Recommendation': 'Mock recommendation for SNP 20'}, 'rs1000021': {'Gene': 'GENE21', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 21', 'Recommendation': 'Mock recommendation for SNP 21'}, 'rs1000022': {'Gene': 'GENE22', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 22', 'Recommendation': 'Mock recommendation for SNP 22'}, 'rs1000023': {'Gene': 'GENE23', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 23', 'Recommendation': 'Mock recommendation for SNP 23'}, 'rs1000024': {'Gene': 'GENE24', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 24', 'Recommendation': 'Mock recommendation for SNP 24'}, 'rs1000025': {'Gene': 'GENE25', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 25', 'Recommendation': 'Mock recommendation for SNP 25'}, 'rs1000026': {'Gene': 'GENE26', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 26', 'Recommendation': 'Mock recommendation for SNP 26'}, 'rs1000027': {'Gene': 'GENE27', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 27', 'Recommendation': 'Mock recommendation for SNP 27'}, 'rs1000028': {'Gene': 'GENE28', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 28', 'Recommendation': 'Mock recommendation for SNP 28'}, 'rs1000029': {'Gene': 'GENE29', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 29', 'Recommendation': 'Mock recommendation for SNP 29'}, 'rs1000030': {'Gene': 'GENE30', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 30', 'Recommendation': 'Mock recommendation for SNP 30'}, 'rs1000031': {'Gene': 'GENE31', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 31', 'Recommendation': 'Mock recommendation for SNP 31'}, 'rs1000032': {'Gene': 'GENE32', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 32', 'Recommendation': 'Mock recommendation for SNP 32'}, 'rs1000033': {'Gene': 'GENE33', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 33', 'Recommendation': 'Mock recommendation for SNP 33'}, 'rs1000034': {'Gene': 'GENE34', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 34', 'Recommendation': 'Mock recommendation for SNP 34'}, 'rs1000035': {'Gene': 'GENE35', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 35', 'Recommendation': 'Mock recommendation for SNP 35'}, 'rs1000036': {'Gene': 'GENE36', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 36', 'Recommendation': 'Mock recommendation for SNP 36'}, 'rs1000037': {'Gene': 'GENE37', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 37', 'Recommendation': 'Mock recommendation for SNP 37'}, 'rs1000038': {'Gene': 'GENE38', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 38', 'Recommendation': 'Mock recommendation for SNP 38'}, 'rs1000039': {'Gene': 'GENE39', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 39', 'Recommendation': 'Mock recommendation for SNP 39'}, 'rs1000040': {'Gene': 'GENE40', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 40', 'Recommendation': 'Mock recommendation for SNP 40'}, 'rs1000041': {'Gene': 'GENE41', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 41', 'Recommendation': 'Mock recommendation for SNP 41'}, 'rs1000042': {'Gene': 'GENE42', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 42', 'Recommendation': 'Mock recommendation for SNP 42'}, 'rs1000043': {'Gene': 'GENE43', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 43', 'Recommendation': 'Mock recommendation for SNP 43'}, 'rs1000044': {'Gene': 'GENE44', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 44', 'Recommendation': 'Mock recommendation for SNP 44'}, 'rs1000045': {'Gene': 'GENE45', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 45', 'Recommendation': 'Mock recommendation for SNP 45'}, 'rs1000046': {'Gene': 'GENE46', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 46', 'Recommendation': 'Mock recommendation for SNP 46'}, 'rs1000047': {'Gene': 'GENE47', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 47', 'Recommendation': 'Mock recommendation for SNP 47'}, 'rs1000048': {'Gene': 'GENE48', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 48', 'Recommendation': 'Mock recommendation for SNP 48'}, 'rs1000049': {'Gene': 'GENE49', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 49', 'Recommendation': 'Mock recommendation for SNP 49'}, 'rs1000050': {'Gene': 'GENE50', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 50', 'Recommendation': 'Mock recommendation for SNP 50'}, 'rs1000051': {'Gene': 'GENE51', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 51', 'Recommendation': 'Mock recommendation for SNP 51'}, 'rs1000052': {'Gene': 'GENE52', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 52', 'Recommendation': 'Mock recommendation for SNP 52'}, 'rs1000053': {'Gene': 'GENE53', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 53', 'Recommendation': 'Mock recommendation for SNP 53'}, 'rs1000054': {'Gene': 'GENE54', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 54', 'Recommendation': 'Mock recommendation for SNP 54'}, 'rs1000055': {'Gene': 'GENE55', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 55', 'Recommendation': 'Mock recommendation for SNP 55'}, 'rs1000056': {'Gene': 'GENE56', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 56', 'Recommendation': 'Mock recommendation for SNP 56'}, 'rs1000057': {'Gene': 'GENE57', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 57', 'Recommendation': 'Mock recommendation for SNP 57'}, 'rs1000058': {'Gene': 'GENE58', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 58', 'Recommendation': 'Mock recommendation for SNP 58'}, 'rs1000059': {'Gene': 'GENE59', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 59', 'Recommendation': 'Mock recommendation for SNP 59'}, 'rs1000060': {'Gene': 'GENE60', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 60', 'Recommendation': 'Mock recommendation for SNP 60'}, 'rs1000061': {'Gene': 'GENE61', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 61', 'Recommendation': 'Mock recommendation for SNP 61'}, 'rs1000062': {'Gene': 'GENE62', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 62', 'Recommendation': 'Mock recommendation for SNP 62'}, 'rs1000063': {'Gene': 'GENE63', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 63', 'Recommendation': 'Mock recommendation for SNP 63'}, 'rs1000064': {'Gene': 'GENE64', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 64', 'Recommendation': 'Mock recommendation for SNP 64'}, 'rs1000065': {'Gene': 'GENE65', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 65', 'Recommendation': 'Mock recommendation for SNP 65'}, 'rs1000066': {'Gene': 'GENE66', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 66', 'Recommendation': 'Mock recommendation for SNP 66'}, 'rs1000067': {'Gene': 'GENE67', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 67', 'Recommendation': 'Mock recommendation for SNP 67'}, 'rs1000068': {'Gene': 'GENE68', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 68', 'Recommendation': 'Mock recommendation for SNP 68'}, 'rs1000069': {'Gene': 'GENE69', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 69', 'Recommendation': 'Mock recommendation for SNP 69'}, 'rs1000070': {'Gene': 'GENE70', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 70', 'Recommendation': 'Mock recommendation for SNP 70'}, 'rs1000071': {'Gene': 'GENE71', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 71', 'Recommendation': 'Mock recommendation for SNP 71'}, 'rs1000072': {'Gene': 'GENE72', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 72', 'Recommendation': 'Mock recommendation for SNP 72'}, 'rs1000073': {'Gene': 'GENE73', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 73', 'Recommendation': 'Mock recommendation for SNP 73'}, 'rs1000074': {'Gene': 'GENE74', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 74', 'Recommendation': 'Mock recommendation for SNP 74'}, 'rs1000075': {'Gene': 'GENE75', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 75', 'Recommendation': 'Mock recommendation for SNP 75'}, 'rs1000076': {'Gene': 'GENE76', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 76', 'Recommendation': 'Mock recommendation for SNP 76'}, 'rs1000077': {'Gene': 'GENE77', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 77', 'Recommendation': 'Mock recommendation for SNP 77'}, 'rs1000078': {'Gene': 'GENE78', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 78', 'Recommendation': 'Mock recommendation for SNP 78'}, 'rs1000079': {'Gene': 'GENE79', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 79', 'Recommendation': 'Mock recommendation for SNP 79'}, 'rs1000080': {'Gene': 'GENE80', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 80', 'Recommendation': 'Mock recommendation for SNP 80'}, 'rs1000081': {'Gene': 'GENE81', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 81', 'Recommendation': 'Mock recommendation for SNP 81'}, 'rs1000082': {'Gene': 'GENE82', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 82', 'Recommendation': 'Mock recommendation for SNP 82'}, 'rs1000083': {'Gene': 'GENE83', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 83', 'Recommendation': 'Mock recommendation for SNP 83'}, 'rs1000084': {'Gene': 'GENE84', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 84', 'Recommendation': 'Mock recommendation for SNP 84'}, 'rs1000085': {'Gene': 'GENE85', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 85', 'Recommendation': 'Mock recommendation for SNP 85'}, 'rs1000086': {'Gene': 'GENE86', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 86', 'Recommendation': 'Mock recommendation for SNP 86'}, 'rs1000087': {'Gene': 'GENE87', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 87', 'Recommendation': 'Mock recommendation for SNP 87'}, 'rs1000088': {'Gene': 'GENE88', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 88', 'Recommendation': 'Mock recommendation for SNP 88'}, 'rs1000089': {'Gene': 'GENE89', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 89', 'Recommendation': 'Mock recommendation for SNP 89'}, 'rs1000090': {'Gene': 'GENE90', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 90', 'Recommendation': 'Mock recommendation for SNP 90'}, 'rs1000091': {'Gene': 'GENE91', 'Nutrient': 'Nutrient1', 'Impact': 'Mock impact description 91', 'Recommendation': 'Mock recommendation for SNP 91'}, 'rs1000092': {'Gene': 'GENE92', 'Nutrient': 'Nutrient2', 'Impact': 'Mock impact description 92', 'Recommendation': 'Mock recommendation for SNP 92'}, 'rs1000093': {'Gene': 'GENE93', 'Nutrient': 'Nutrient3', 'Impact': 'Mock impact description 93', 'Recommendation': 'Mock recommendation for SNP 93'}, 'rs1000094': {'Gene': 'GENE94', 'Nutrient': 'Nutrient4', 'Impact': 'Mock impact description 94', 'Recommendation': 'Mock recommendation for SNP 94'}, 'rs1000095': {'Gene': 'GENE95', 'Nutrient': 'Nutrient5', 'Impact': 'Mock impact description 95', 'Recommendation': 'Mock recommendation for SNP 95'}, 'rs1000096': {'Gene': 'GENE96', 'Nutrient': 'Nutrient6', 'Impact': 'Mock impact description 96', 'Recommendation': 'Mock recommendation for SNP 96'}, 'rs1000097': {'Gene': 'GENE97', 'Nutrient': 'Nutrient7', 'Impact': 'Mock impact description 97', 'Recommendation': 'Mock recommendation for SNP 97'}, 'rs1000098': {'Gene': 'GENE98', 'Nutrient': 'Nutrient8', 'Impact': 'Mock impact description 98', 'Recommendation': 'Mock recommendation for SNP 98'}, 'rs1000099': {'Gene': 'GENE99', 'Nutrient': 'Nutrient9', 'Impact': 'Mock impact description 99', 'Recommendation': 'Mock recommendation for SNP 99'}, 'rs10000100': {'Gene': 'GENE100', 'Nutrient': 'Nutrient0', 'Impact': 'Mock impact description 100', 'Recommendation': 'Mock recommendation for SNP 100'}}
 
-# --- Upload CSV ---
+snp_annotations = {
+    'rs1544410': {
+        'gene': 'VDR',
+        'nutrient': 'Vitamin D',
+        'impact': 'Reduced vitamin D receptor function',
+        'recommendation': 'Consider vitamin D3 supplements'
+    },
+    'rs2228570': {
+        'gene': 'VDR',
+        'nutrient': 'Vitamin D',
+        'impact': 'Affects vitamin D metabolism',
+        'recommendation': 'Monitor vitamin D levels regularly'
+    },
+    'rs1801133': {
+        'gene': 'MTHFR',
+        'nutrient': 'Folate',
+        'impact': 'Poor folate conversion',
+        'recommendation': 'Take methylated folate; eat leafy greens'
+    },
+    'rs1801131': {
+        'gene': 'MTHFR',
+        'nutrient': 'Folate',
+        'impact': 'Intermediate folate metabolism',
+        'recommendation': 'Moderate supplementation may help'
+    },
+    'rs4988235': {
+        'gene': 'LCT',
+        'nutrient': 'Lactose',
+        'impact': 'Reduced lactase production',
+        'recommendation': 'Try lactose-free dairy or enzyme supplements'
+    },
+    'rs1799945': {
+        'gene': 'HFE',
+        'nutrient': 'Iron',
+        'impact': 'Risk of iron overload',
+        'recommendation': 'Avoid iron supplements unless tested'
+    },
+    'rs174537': {
+        'gene': 'FADS1',
+        'nutrient': 'Omega-3 fatty acids',
+        'impact': 'Lower DHA synthesis',
+        'recommendation': 'Consume EPA/DHA from fish or algae oils'
+    },
+    'rs762551': {
+        'gene': 'CYP1A2',
+        'nutrient': 'Caffeine',
+        'impact': 'Fast caffeine metabolism',
+        'recommendation': 'Higher caffeine tolerance'
+    },
+    'rs738409': {
+        'gene': 'PNPLA3',
+        'nutrient': 'Vitamin E',
+        'impact': 'Liver fat accumulation risk',
+        'recommendation': 'Consider vitamin E under supervision'
+    },
+    'rs9939609': {
+        'gene': 'FTO',
+        'nutrient': 'General metabolism',
+        'impact': 'Increased risk of obesity',
+        'recommendation': 'Focus on physical activity and diet'
+    },
+    'rs1000011': {
+        'gene': 'GENE11',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 11',
+        'recommendation': 'Mock recommendation for SNP 11'
+    },
+    'rs1000012': {
+        'gene': 'GENE12',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 12',
+        'recommendation': 'Mock recommendation for SNP 12'
+    },
+    'rs1000013': {
+        'gene': 'GENE13',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 13',
+        'recommendation': 'Mock recommendation for SNP 13'
+    },
+    'rs1000014': {
+        'gene': 'GENE14',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 14',
+        'recommendation': 'Mock recommendation for SNP 14'
+    },
+    'rs1000015': {
+        'gene': 'GENE15',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 15',
+        'recommendation': 'Mock recommendation for SNP 15'
+    },
+    'rs1000016': {
+        'gene': 'GENE16',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 16',
+        'recommendation': 'Mock recommendation for SNP 16'
+    },
+    'rs1000017': {
+        'gene': 'GENE17',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 17',
+        'recommendation': 'Mock recommendation for SNP 17'
+    },
+    'rs1000018': {
+        'gene': 'GENE18',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 18',
+        'recommendation': 'Mock recommendation for SNP 18'
+    },
+    'rs1000019': {
+        'gene': 'GENE19',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 19',
+        'recommendation': 'Mock recommendation for SNP 19'
+    },
+    'rs1000020': {
+        'gene': 'GENE20',
+        'nutrient': 'Nutrient0',
+        'impact': 'Mock impact description 20',
+        'recommendation': 'Mock recommendation for SNP 20'
+    },
+    'rs1000021': {
+        'gene': 'GENE21',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 21',
+        'recommendation': 'Mock recommendation for SNP 21'
+    },
+    'rs1000022': {
+        'gene': 'GENE22',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 22',
+        'recommendation': 'Mock recommendation for SNP 22'
+    },
+    'rs1000023': {
+        'gene': 'GENE23',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 23',
+        'recommendation': 'Mock recommendation for SNP 23'
+    },
+    'rs1000024': {
+        'gene': 'GENE24',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 24',
+        'recommendation': 'Mock recommendation for SNP 24'
+    },
+    'rs1000025': {
+        'gene': 'GENE25',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 25',
+        'recommendation': 'Mock recommendation for SNP 25'
+    },
+    'rs1000026': {
+        'gene': 'GENE26',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 26',
+        'recommendation': 'Mock recommendation for SNP 26'
+    },
+    'rs1000027': {
+        'gene': 'GENE27',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 27',
+        'recommendation': 'Mock recommendation for SNP 27'
+    },
+    'rs1000028': {
+        'gene': 'GENE28',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 28',
+        'recommendation': 'Mock recommendation for SNP 28'
+    },
+    'rs1000029': {
+        'gene': 'GENE29',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 29',
+        'recommendation': 'Mock recommendation for SNP 29'
+    },
+    'rs1000030': {
+        'gene': 'GENE30',
+        'nutrient': 'Nutrient0',
+        'impact': 'Mock impact description 30',
+        'recommendation': 'Mock recommendation for SNP 30'
+    },
+    'rs1000031': {
+        'gene': 'GENE31',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 31',
+        'recommendation': 'Mock recommendation for SNP 31'
+    },
+    'rs1000032': {
+        'gene': 'GENE32',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 32',
+        'recommendation': 'Mock recommendation for SNP 32'
+    },
+    'rs1000033': {
+        'gene': 'GENE33',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 33',
+        'recommendation': 'Mock recommendation for SNP 33'
+    },
+    'rs1000034': {
+        'gene': 'GENE34',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 34',
+        'recommendation': 'Mock recommendation for SNP 34'
+    },
+    'rs1000035': {
+        'gene': 'GENE35',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 35',
+        'recommendation': 'Mock recommendation for SNP 35'
+    },
+    'rs1000036': {
+        'gene': 'GENE36',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 36',
+        'recommendation': 'Mock recommendation for SNP 36'
+    },
+    'rs1000037': {
+        'gene': 'GENE37',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 37',
+        'recommendation': 'Mock recommendation for SNP 37'
+    },
+    'rs1000038': {
+        'gene': 'GENE38',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 38',
+        'recommendation': 'Mock recommendation for SNP 38'
+    },
+    'rs1000039': {
+        'gene': 'GENE39',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 39',
+        'recommendation': 'Mock recommendation for SNP 39'
+    },
+    'rs1000040': {
+        'gene': 'GENE40',
+        'nutrient': 'Nutrient0',
+        'impact': 'Mock impact description 40',
+        'recommendation': 'Mock recommendation for SNP 40'
+    },
+    'rs1000041': {
+        'gene': 'GENE41',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 41',
+        'recommendation': 'Mock recommendation for SNP 41'
+    },
+    'rs1000042': {
+        'gene': 'GENE42',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 42',
+        'recommendation': 'Mock recommendation for SNP 42'
+    },
+    'rs1000043': {
+        'gene': 'GENE43',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 43',
+        'recommendation': 'Mock recommendation for SNP 43'
+    },
+    'rs1000044': {
+        'gene': 'GENE44',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 44',
+        'recommendation': 'Mock recommendation for SNP 44'
+    },
+    'rs1000045': {
+        'gene': 'GENE45',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 45',
+        'recommendation': 'Mock recommendation for SNP 45'
+    },
+    'rs1000046': {
+        'gene': 'GENE46',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 46',
+        'recommendation': 'Mock recommendation for SNP 46'
+    },
+    'rs1000047': {
+        'gene': 'GENE47',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 47',
+        'recommendation': 'Mock recommendation for SNP 47'
+    },
+    'rs1000048': {
+        'gene': 'GENE48',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 48',
+        'recommendation': 'Mock recommendation for SNP 48'
+    },
+    'rs1000049': {
+        'gene': 'GENE49',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 49',
+        'recommendation': 'Mock recommendation for SNP 49'
+    },
+    'rs1000050': {
+        'gene': 'GENE50',
+        'nutrient': 'Nutrient0',
+        'impact': 'Mock impact description 50',
+        'recommendation': 'Mock recommendation for SNP 50'
+    },
+    'rs1000051': {
+        'gene': 'GENE51',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 51',
+        'recommendation': 'Mock recommendation for SNP 51'
+    },
+    'rs1000052': {
+        'gene': 'GENE52',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 52',
+        'recommendation': 'Mock recommendation for SNP 52'
+    },
+    'rs1000053': {
+        'gene': 'GENE53',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 53',
+        'recommendation': 'Mock recommendation for SNP 53'
+    },
+    'rs1000054': {
+        'gene': 'GENE54',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 54',
+        'recommendation': 'Mock recommendation for SNP 54'
+    },
+    'rs1000055': {
+        'gene': 'GENE55',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 55',
+        'recommendation': 'Mock recommendation for SNP 55'
+    },
+    'rs1000056': {
+        'gene': 'GENE56',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 56',
+        'recommendation': 'Mock recommendation for SNP 56'
+    },
+    'rs1000057': {
+        'gene': 'GENE57',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 57',
+        'recommendation': 'Mock recommendation for SNP 57'
+    },
+    'rs1000058': {
+        'gene': 'GENE58',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 58',
+        'recommendation': 'Mock recommendation for SNP 58'
+    },
+    'rs1000059': {
+        'gene': 'GENE59',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 59',
+        'recommendation': 'Mock recommendation for SNP 59'
+    },
+    'rs1000060': {
+        'gene': 'GENE60',
+        'nutrient': 'Nutrient0',
+        'impact': 'Mock impact description 60',
+        'recommendation': 'Mock recommendation for SNP 60'
+    },
+    'rs1000061': {
+        'gene': 'GENE61',
+        'nutrient': 'Nutrient1',
+        'impact': 'Mock impact description 61',
+        'recommendation': 'Mock recommendation for SNP 61'
+    },
+    'rs1000062': {
+        'gene': 'GENE62',
+        'nutrient': 'Nutrient2',
+        'impact': 'Mock impact description 62',
+        'recommendation': 'Mock recommendation for SNP 62'
+    },
+    'rs1000063': {
+        'gene': 'GENE63',
+        'nutrient': 'Nutrient3',
+        'impact': 'Mock impact description 63',
+        'recommendation': 'Mock recommendation for SNP 63'
+    },
+    'rs1000064': {
+        'gene': 'GENE64',
+        'nutrient': 'Nutrient4',
+        'impact': 'Mock impact description 64',
+        'recommendation': 'Mock recommendation for SNP 64'
+    },
+    'rs1000065': {
+        'gene': 'GENE65',
+        'nutrient': 'Nutrient5',
+        'impact': 'Mock impact description 65',
+        'recommendation': 'Mock recommendation for SNP 65'
+    },
+    'rs1000066': {
+        'gene': 'GENE66',
+        'nutrient': 'Nutrient6',
+        'impact': 'Mock impact description 66',
+        'recommendation': 'Mock recommendation for SNP 66'
+    },
+    'rs1000067': {
+        'gene': 'GENE67',
+        'nutrient': 'Nutrient7',
+        'impact': 'Mock impact description 67',
+        'recommendation': 'Mock recommendation for SNP 67'
+    },
+    'rs1000068': {
+        'gene': 'GENE68',
+        'nutrient': 'Nutrient8',
+        'impact': 'Mock impact description 68',
+        'recommendation': 'Mock recommendation for SNP 68'
+    },
+    'rs1000069': {
+        'gene': 'GENE69',
+        'nutrient': 'Nutrient9',
+        'impact': 'Mock impact description 69',
+        'recommendation': 'Mock recommendation for SNP 69'
+    }
+}
+
+# To avoid long scroll, assuming you already defined `snp_annotations` as provided earlier
+
+# ---- Upload Section ----
 uploaded_file = st.file_uploader("📁 Upload your SNP CSV file", type="csv")
 
 if uploaded_file:
-    file_text = uploaded_file.read().decode("utf-8")
+    file_text = uploaded_file.read().decode("utf-8-sig")  # Handles BOM from Excel exports
     st.success("✅ File uploaded successfully!")
+
     csv_reader = csv.DictReader(io.StringIO(file_text))
     data = list(csv_reader)
 
-    st.write("### 👁️ Preview of Uploaded Data")
-    st.dataframe(data)
+    if not data or 'SNP ID' not in data[0]:
+        st.error("❌ Your CSV must have a 'SNP ID' column.")
+        st.stop()
 
-    # --- SNP ID Search ---
-    user_input = st.text_input("🔍 Enter SNP ID to search (e.g., rs12345)")
+    df = pd.DataFrame(data)
+    st.write("### 👁️ Preview of Uploaded Data")
+    st.dataframe(df.head(20))  # Show first 20 rows
+
+    # ---- SNP Search ----
+    user_input = st.text_input("🔍 Enter SNP ID to search (e.g., rs1544410)")
 
     if user_input:
-        matches = [row for row in data if row['SNP ID'].lower() == user_input.lower()]
+        query = user_input.strip().lower()
+        matches = [row for row in data if row['SNP ID'].strip().lower() == query]
+
         if matches:
             st.success("✅ SNP found in your file:")
             st.write(matches[0])
 
-            snp_id_clean = user_input.lower()
-            if snp_id_clean in snp_annotations:
-                annotation = snp_annotations[snp_id_clean]
+            if query in snp_annotations:
+                annotation = snp_annotations[query]
                 st.markdown("### 📌 Annotation from NutraDatabase")
                 st.write(f"**Gene:** {annotation['gene']}")
                 st.write(f"**Nutrient Affected:** {annotation['nutrient']}")
                 st.write(f"**Impact:** {annotation['impact']}")
                 st.write(f"**Recommendation:** {annotation['recommendation']}")
-                st.markdown(f"[📖 PubMed Reference]({annotation['reference']})")
             else:
-                st.info("ℹ️ No annotation found in database for this SNP.")
+                st.info("ℹ️ No annotation found in the database for this SNP.")
         else:
-            st.warning("⚠️ SNP not found. Please try again.")
+            st.warning("⚠️ SNP not found in your uploaded file.")
 
-    # --- Show All Annotated SNPs ---
+    # ---- Show All Annotated SNPs ----
     st.markdown("---")
     if st.button("🔎 Show All Annotated SNPs in My File"):
         annotated_matches = []
         for row in data:
-            snp_id = row['SNP ID'].lower()
+            snp_id = row['SNP ID'].strip().lower()
             if snp_id in snp_annotations:
-                row_with_annotation = row.copy()
-                row_with_annotation.update(snp_annotations[snp_id])
-                annotated_matches.append(row_with_annotation)
+                annotated_row = row.copy()
+                annotated_row.update(snp_annotations[snp_id])
+                annotated_matches.append(annotated_row)
 
         if annotated_matches:
+            annotated_df = pd.DataFrame(annotated_matches)
             st.write(f"### 🧾 Found {len(annotated_matches)} annotated SNPs in your file:")
-            st.dataframe(annotated_matches)
+            st.dataframe(annotated_df)
+
+            # Optional: Download CSV button
+            csv_out = annotated_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Annotated SNPs CSV",
+                data=csv_out,
+                file_name="annotated_snps.csv",
+                mime='text/csv'
+            )
         else:
             st.warning("😕 No SNPs from your file matched our annotation database.")
 else:
